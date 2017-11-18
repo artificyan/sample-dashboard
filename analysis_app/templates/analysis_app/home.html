@@ -3,12 +3,12 @@
         <title>Erin Allard's Assessment</title>
     </head>
     <body>
-        <p>Hi there!</p>
-        <p>It works!</p>
-        <p>
-        	{% for trip in test_trips %}
-    			{{ trip }}
-			{% endfor %}
-		</p>
+
+	    <form action="/" method="post">
+	    	{% csrf_token %}
+	    	{{ query_form.as_p }}
+	    	<input type="submit" value="Submit" />
+		</form>
+
     </body>
 </html>

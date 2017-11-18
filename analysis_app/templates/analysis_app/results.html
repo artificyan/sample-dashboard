@@ -1,0 +1,106 @@
+<html lang="en">
+    <head>
+
+        <title>Energy Drink Sales Dashboard</title>
+
+        <!-- Required meta tags -->
+	    <meta charset="utf-8">
+	    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+        <!-- Load Bootstrap CSS -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
+
+        <!-- Additional CSS styles -->
+        <link rel="stylesheet" type="text/css" href="static/css/style.css">
+
+        <!-- Chart.js -->
+        <script src='https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.min.js'></script>
+    
+    	<!-- Load jQuery -->
+	    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+    </head>
+
+    <body>
+
+    {% block jquery %}
+	    <script>
+	    	var endpoint = '/api/data/';
+
+	    	$.ajax({
+	    		method: 'GET',
+	    		url: endpoint,
+	    		success: function(data) {
+	    			console.log(data.customers * 237)
+	    			console.log(data);
+	    		},
+	    		error: function(error_data) {
+	    			console.log("error");
+	    			console.log(error_data);
+	    		}
+	    	})
+	    </script>
+	{% endblock %}
+
+	    <div id="search-parameters">
+	    	<h2>Your Search Parameters</h2>
+	    		<p>Brand: {{ brand }}</p>
+			    <p>Retailer: {{ retailer }}</p>
+			    <p>Start date: {{ start_date }}</p>
+			    <p>End date: {{ end_date }}</p>
+		</div>
+
+		<div id="household-counts">
+	        <h2>Household Counts</h2>
+	        	<p>{{ total_hhs }} households shopped between {{ min_date }} and {{ max_date }} (largest available date range).</p>
+
+	        	<p>{{ count_hhs }} households purchased {{ brand }} products from {{ retailer }} between {{ start_date }} and {{ end_date}}.</p>
+	    </div>
+
+	    <div id="household-spending">
+	        <h2>Average Household Spending by Brand</h2>
+	        <h4>For the period {{ start_date }} through {{ end_date }}</h4>
+
+	        <div id="household-spending-table">
+		        <table style="width:50%">
+				  <tr style="text-align: left">
+				    <th>Retailer</th>
+				    <th>Avg. Spend / HH</th> 
+				    <th>Total Spent</th>
+				    <th>Households</th>
+				  </tr>
+
+			        {% for key, value in avg_brand_spend_hh.items %}
+
+						<tr>
+			        	{% for item in value %}
+			        		{% if forloop.first %}
+			        			<td>{{ key }}</td> 
+			        			<td>${{ item }}</td>
+
+			        		{% elif forloop.last %}
+				        		<td>{{ item }}</td>
+
+			        		{% else %}
+				        		<td>${{ item }}</td>
+				        	{% endif %}
+			        	{% endfor %}
+			        	</tr>
+		        	{% endfor %}
+				</table>
+			</div> <!-- End household-spending-table -->
+		</div> <!-- End household-spending -->
+
+		<div id="household-spending-chart">
+			<canvas id="hhSpendChart" width=30% height="500"></canvas>
+		</div>
+
+		<!-- Load JS for Bootstrap-->
+		<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+		<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
+
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
+    </body>
+</html>
