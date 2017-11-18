@@ -8,6 +8,9 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 
 def home(request):
+	'''Renders a search form if receiving a GET request, or renders a results
+	page if receiving a POST request. Uses form data and data captured from 
+	calls to helper functions in order to send dynamic data to the template.'''
 
 	if request.method == 'POST':
 		query_form = QueryForm(request.POST)
@@ -21,7 +24,6 @@ def home(request):
 			end_date = clean_query['end_date']
 
 			# Call helper functions to obtain values to pass to template
-
 			global start_date_str
 			start_date_str = helper_start_date(start_date)
 
@@ -39,7 +41,6 @@ def home(request):
 			sorted_avg_spend = []
 			for item in sorted_brand_list:
 				sorted_avg_spend.append(avg_brand_spend_hh[item][0])
-			print(sorted_avg_spend)
 
 			return render(request, 'analysis_app/results.html', {'brand': brand,
 																'retailer': retailer,
@@ -58,20 +59,23 @@ def home(request):
 		query_form = QueryForm()
 		return render(request, 'analysis_app/home.html', {'query_form': query_form})
 
+
 def results(request):
 	return render(request, 'analysis_app/results.html')
 
 
+# Send JSON data to Chart.js via a REST API call
 class BarChartData(APIView):
 
     authentication_classes = []
     permission_classes = []
 
     def get(self, request, format=None):
-    	''''''
-
-    	# Create a list of brands sorted alphabetically
-    	# Makes use of the global variables start_date_str and end_date_str as defined in the home view
+    	'''Creates a list of brands sorted alphabetically. Makes use of the 
+    	global variables start_date_str and end_date_str as defined in the 
+    	home view. Creates a list of average spend per household for each brand
+    	during a time range, sorted to match the brand order in sorted_brand_list.'''
+    	
     	all_brands_qs = Trips.objects.filter(date__gte=start_date_str, 
 										date__lte=end_date_str).values('brand').distinct()
     	brand_list = []
@@ -96,16 +100,19 @@ class BarChartData(APIView):
     	return Response(data)
 
 
+# Send JSON data to Chart.js via a REST API call
 class PieChartData(APIView):
 
     authentication_classes = []
     permission_classes = []
 
     def get(self, request, format=None):
-    	''''''
+    	'''Creates a list of brands sorted alphabetically. Makes use of the 
+    	global variables start_date_str and end_date_str as defined in the 
+    	home view. Creates a list of items representing the number of households 
+    	that purchased each brand. The list is sorted to match the order the 
+    	brands appearing in sorted_brand_list.'''
 
-    	# Create a list of brands sorted alphabetically
-    	# Makes use of the global variables start_date_str and end_date_str as defined in the home view
     	all_brands_qs = Trips.objects.filter(date__gte=start_date_str, 
 										date__lte=end_date_str).values('brand').distinct()
     	brand_list = []
@@ -125,6 +132,7 @@ class PieChartData(APIView):
 								date__lte=end_date_str, brand=brand).values('user_id').distinct().count()
     		print("Temp_hhs_by_brand: ", temp_hhs_by_brand)
     		sorted_hhs_by_brand.append(temp_hhs_by_brand)
+    	print("Sorted hhs by brand: ", sorted_hhs_by_brand)
 
     	data = {'sorted_brands': sorted_brand_list, 
     			'sorted_hhs_by_brand': sorted_hhs_by_brand}

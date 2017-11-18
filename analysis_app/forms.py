@@ -1,4 +1,5 @@
 from django import forms
+from django.contrib.admin.widgets import AdminDateWidget
 from .models import Trips
 
 
@@ -17,6 +18,9 @@ BRANDS = [('5 Hour Energy', '5 Hour Energy'),
 			('Red Bull', 'Red Bull'),
 			('Rockstar', 'Rockstar')]
 
+MONTHS = {1:'January', 2:'February', 3:'March', 4:'April',
+    		5:'May', 6:'June'}
+
 
 class QueryForm(forms.Form):
 
@@ -28,15 +32,17 @@ class QueryForm(forms.Form):
 								required=False,
 								label="Retailer")
 
-	start_date = forms.DateField(required=False, 
+	start_date = forms.DateField(required=True, 
 								label="Start Date", 
-								widget=forms.DateInput(attrs={'placeholder': 'YYYY-MM-DD'}),
-								help_text="Leave blank to use earliest available date (2014-01-02)")
+								widget = forms.SelectDateWidget(years=[2014],
+																months=MONTHS),
+								help_text = "Data available from January 2, 2014.")
 
-	end_date = forms.DateField(required=False, 
-								label="End Date", 
-								widget=forms.DateInput(attrs={'placeholder': 'YYYY-MM-DD'}),
-								help_text="Leave blank to use latest available date (2014-06-30)")
+	end_date = forms.DateField(required=True, 
+								label="Start Date", 
+								widget = forms.SelectDateWidget(years=[2014],
+																months=MONTHS),
+								help_text = "Data available to June 30, 2014.")
 
 
 
