@@ -8,10 +8,13 @@
 	    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
         <!-- Load Bootstrap CSS -->
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous" />
+
+        <!-- Import Google font -->
+        <link href="https://fonts.googleapis.com/css?family=Montserrat:300" rel="stylesheet">
 
         <!-- Additional CSS styles -->
-        <link rel="stylesheet" type="text/css" href="static/css/style.css">
+        <link rel='stylesheet' type='text/css' href='/../../../static/css/style.css'/>
 
         <!-- Chart.js -->
         <script src='https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.min.js'></script>
@@ -19,36 +22,52 @@
     	<!-- Load jQuery -->
 	    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 
+	    <style>
+	    	body {
+    			font-family: 'Montserrat';
+    			padding-left: 50px;
+    			padding-top: 50px;
+    			padding-bottom: 50px;
+			}
+
+			.btn-outline-primary {
+				border-color: #FF7011;
+				color: #415767;
+				pointer-events: none;
+			}
+
+			h2 {
+				font-weight: bold;
+				color: #415767;
+			}
+
+			table, th, td {
+    			border: 1px solid #DCDCDC;
+			}
+
+			th {
+				font-size: 1.05em;
+				background-color: #E9E9E9;
+			}
+
+			th, td { 
+				padding: 5px; 
+			}
+	    </style>
+
     </head>
 
     <body>
 
-    {% block jquery %}
-	    <script>
-	    	var endpoint = '/api/data/';
-
-	    	$.ajax({
-	    		method: 'GET',
-	    		url: endpoint,
-	    		success: function(data) {
-	    			console.log(data.customers * 237)
-	    			console.log(data);
-	    		},
-	    		error: function(error_data) {
-	    			console.log("error");
-	    			console.log(error_data);
-	    		}
-	    	})
-	    </script>
-	{% endblock %}
-
 	    <div id="search-parameters">
 	    	<h2>Your Search Parameters</h2>
-	    		<p>Brand: {{ brand }}</p>
-			    <p>Retailer: {{ retailer }}</p>
-			    <p>Start date: {{ start_date }}</p>
-			    <p>End date: {{ end_date }}</p>
+	    		<button type="button" class="btn btn-outline-primary">{{ brand }}</button>
+	    		<button type="button" class="btn btn-outline-primary">{{ retailer }}</button>
+	    		<button type="button" class="btn btn-outline-primary">{{ start_date }}</button>
+	    		<button type="button" class="btn btn-outline-primary">{{ end_date }}</button>
 		</div>
+
+	    <br><br>
 
 		<div id="household-counts">
 	        <h2>Household Counts</h2>
@@ -57,14 +76,17 @@
 	        	<p>{{ count_hhs }} households purchased {{ brand }} products from {{ retailer }} between {{ start_date }} and {{ end_date}}.</p>
 	    </div>
 
+	    <br><br>
+
 	    <div id="household-spending">
 	        <h2>Average Household Spending by Brand</h2>
-	        <h4>For the period {{ start_date }} through {{ end_date }}</h4>
+	        <h5>For the period {{ start_date }} through {{ end_date }}</h5>
+	        <br>
 
 	        <div id="household-spending-table">
 		        <table style="width:50%">
 				  <tr style="text-align: left">
-				    <th>Retailer</th>
+				    <th>Brand</th>
 				    <th>Avg. Spend / HH</th> 
 				    <th>Total Spent</th>
 				    <th>Households</th>
@@ -88,12 +110,81 @@
 			        	</tr>
 		        	{% endfor %}
 				</table>
+				<br>
+				<br>
 			</div> <!-- End household-spending-table -->
 		</div> <!-- End household-spending -->
 
-		<div id="household-spending-chart">
-			<canvas id="hhSpendChart" width=30% height="500"></canvas>
+		<div id="household-spending-chart" class='col-lg-6'>
+			<canvas id="hh-spend-chart"></canvas>
 		</div>
+
+		<br><br><br>
+
+		<script>
+	    {% block jquery %}
+
+	    var endpoint = '/api/chart/data/';
+	    var defaultData = [];
+	    var labels = [];
+
+	    	$.ajax({
+	    		method: 'GET',
+	    		url: endpoint,
+	    		success: function(data) {
+	    			labels = data.sorted_brands;
+	    			data = data.sorted_avg_spend;
+	    			console.log(data);
+
+			    	var ctx = document.getElementById("hh-spend-chart").getContext('2d');
+					var myChart = new Chart(ctx, {
+					    type: 'bar',
+					    data: {
+					        labels: labels,
+					        datasets: [{
+					            label: 'Avg. $ Spent per Household',
+					            data: data,
+					            backgroundColor: [
+								                '#FF7011',
+								                '#FF7011',
+								                '#FF7011',
+								                '#FF7011',
+								],
+			    			}],
+			    		},
+			    	})
+			    },
+	    		error: function(error_data) {
+	    			console.log("error");
+	    			console.log(error_data);
+	    		}
+	    	})
+
+
+
+			//             borderColor: [
+			//                 'rgba(255,99,132,1)',
+			//                 'rgba(54, 162, 235, 1)',
+			//                 'rgba(255, 206, 86, 1)',
+			//                 'rgba(75, 192, 192, 1)',
+			//                 'rgba(153, 102, 255, 1)',
+			//                 'rgba(255, 159, 64, 1)'
+			//             ],
+			//             borderWidth: 1
+			//         }]
+			//     },
+			//     options: {
+			//         scales: {
+			//             yAxes: [{
+			//                 ticks: {
+			//                     beginAtZero:true
+			//                 }
+			//             }]
+			//         }
+			//     }
+			// });
+		{% endblock %}
+	    </script>
 
 		<!-- Load JS for Bootstrap-->
 		<!-- jQuery first, then Popper.js, then Bootstrap JS -->
