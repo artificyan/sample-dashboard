@@ -62,7 +62,7 @@ def results(request):
 	return render(request, 'analysis_app/results.html')
 
 
-class ChartData(APIView):
+class BarChartData(APIView):
 
     authentication_classes = []
     permission_classes = []
@@ -80,7 +80,6 @@ class ChartData(APIView):
     		brand_list.append(brand['brand'])
 
     	sorted_brand_list = sorted(brand_list)
-    	print(sorted_brand_list)
 
     	# Create a list of average spending per household that is sorted to match
     	# the order the brands appear in sorted_brand_list
@@ -93,6 +92,42 @@ class ChartData(APIView):
 
     	data = {'sorted_brands': sorted_brand_list, 
     			'sorted_avg_spend': sorted_avg_spend}
+
+    	return Response(data)
+
+
+class PieChartData(APIView):
+
+    authentication_classes = []
+    permission_classes = []
+
+    def get(self, request, format=None):
+    	''''''
+
+    	# Create a list of brands sorted alphabetically
+    	# Makes use of the global variables start_date_str and end_date_str as defined in the home view
+    	all_brands_qs = Trips.objects.filter(date__gte=start_date_str, 
+										date__lte=end_date_str).values('brand').distinct()
+    	brand_list = []
+
+    	for brand in all_brands_qs:
+    		brand_list.append(brand['brand'])
+
+    	sorted_brand_list = sorted(brand_list)
+
+    	# Create a list of items representing the number of households that purchased
+    	# each brand. The list is sorted to match the order the brands appearing in sorted_brand_list
+    	
+    	sorted_hhs_by_brand = []
+
+    	for brand in sorted_brand_list:
+    		temp_hhs_by_brand = Trips.objects.filter(date__gte=start_date_str, 
+								date__lte=end_date_str, brand=brand).values('user_id').distinct().count()
+    		print("Temp_hhs_by_brand: ", temp_hhs_by_brand)
+    		sorted_hhs_by_brand.append(temp_hhs_by_brand)
+
+    	data = {'sorted_brands': sorted_brand_list, 
+    			'sorted_hhs_by_brand': sorted_hhs_by_brand}
 
     	return Response(data)
 
